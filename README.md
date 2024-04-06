@@ -1,4 +1,4 @@
-![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/02c78152-87af-4480-8767-9fecf7406ed4)# staking_walkthrough
+
 Find the process of setting up a validator node overwhelming? Don't worry, this tutorial will guide you step by step on how to do it!
 
 This walkthrough will guide you through the essential steps to set up a validator node on the Holesky testnet, considering that Goerli is deprecated. Additionally, it will address common errors that may occur during the process. While heavily influenced by https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator, this tutorial aims not to replace it but to share my personal experience, which may be beneficial for those with less expertise in this area. With that said, let's get started!
