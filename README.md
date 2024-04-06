@@ -22,13 +22,15 @@ Personally, I opted for the latter as it tends to be more convenient. Specifical
 ## Step 2: First steps
 If you're using a VPS from a Windows computer, utilize tools like Putty or Mobaxterm (the one I'll be using) to establish a connection to the node. On the other hand, if you're operating from a Linux computer, initiate an SSH connection via:
 
-```ssh username@vps_ip_address```
+```bash
+ssh username@vps_ip_address
+```
 
 Simply log in if you're using a computer.
 
 Once you are in, update and upgrade the node, and install all dependencies:
 
-   ```bash
+``` bash
    sudo apt-get update -y && sudo apt dist-upgrade -y
 
    sudo apt-get install git ufw curl ccze jq -y
@@ -37,23 +39,30 @@ Once you are in, update and upgrade the node, and install all dependencies:
 
    sudo apt-get autoclean
 
-   sudo reboot``
+   sudo reboot
+```
 
 Create a new user called ethereum. This step aligns with fundamental principles such as least privilege, security risk mitigation, and improved control. Do not do everyhting with root account, as this practice undermines security standards.
 
 Add the new user and set the password.
 
-```sudo useradd -m -s /bin/bash ethereum```
+```bash
+   sudo useradd -m -s /bin/bash ethereum
 
-```sudo passwd ethereum```
+   sudo passwd ethereum
+```
 
 Grant the new user administrative privileges by adding them to a superuser group.
 
-```sudo usermod -aG sudo ethereum```
+```bash
+   sudo usermod -aG sudo ethereum
+```
 
 Log in as this new user (switch to this new user whenever you need to interact with the validator node).
 
-```su ethereum```
+```bash
+su ethereum
+```
 
 You can change your SSH configuration to automatically log in with this user by default. This way, you won't need to perform the previous step every time you log in.
 
