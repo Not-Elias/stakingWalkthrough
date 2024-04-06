@@ -28,15 +28,16 @@ Simply log in if you're using a computer.
 
 Once you are in, update and upgrade the node, and install all dependencies:
 
-```sudo apt-get update -y && sudo apt dist-upgrade -y```
+   ```bash
+   sudo apt-get update -y && sudo apt dist-upgrade -y
 
-``sudo apt-get install git ufw curl ccze jq -y``
+   sudo apt-get install git ufw curl ccze jq -y
 
-``sudo apt-get autoremove``
+   sudo apt-get autoremove
 
-``sudo apt-get autoclean``
+   sudo apt-get autoclean
 
-``sudo reboot``
+   sudo reboot``
 
 Create a new user called ethereum. This step aligns with fundamental principles such as least privilege, security risk mitigation, and improved control. Do not do everyhting with root account, as this practice undermines security standards.
 
