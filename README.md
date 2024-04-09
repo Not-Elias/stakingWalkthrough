@@ -79,9 +79,9 @@ Set your timezone.
 ```bash
    sudo dpkg-reconfigure tzdata
 ```
-It will pop up a simple interface where u have to select where you live, if all has been done correctly, it should output your local time whilelist the universal time.
+It will pop up a simple interface where u have to select where you live, if all has been done correctly, it should output your local time along with the universal time.
 
-Let's create a jwtsecret file, this file contains a hexadecimal string which ensures correct authenticated communications between both clients.
+Let's create a jwtsecret file, this file contains an hexadecimal string which ensures correct authenticated communications between both clients.
 ```bash
    # Store the jwtsecret file at /secrets
    sudo mkdir -p /secrets
@@ -92,11 +92,11 @@ Let's create a jwtsecret file, this file contains a hexadecimal string which ens
    # Enable read access
    sudo chmod 644 /secrets/jwtsecret
 ```
-Enabling a firewall is not obligatory, but it's highly recommended for enhancing security. Similarly, installing fail2ban is an important step, as it automatically blocks IP addresses after a certain number of failed login attempts. If u want to proceed with this, refer to https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator/step-2-configuring-node.
+Enabling a firewall is not mandatory, but it's highly recommended for enhancing security. Similarly, installing fail2ban is an important step, as it automatically blocks IP addresses after a certain number of failed login attempts. If u want to proceed with this, refer to https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator/step-2-configuring-node.
 
 
 ## Step 3: Installing Nethermind
-After installing any client, I encourage you to do your own research. It's always a good practise to use minority client to avoid no-finality risks, in my case, I will use Nethermind + Lighthosue.
+After installing any client, I encourage you to do your own research. It's always a good practise to use minority client to avoid no-finality risks, in my case, I will use a Nethermind + Lighthosue combination.
 ![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/7cd31dfe-4420-4337-a296-3528671337f4)
 You can refer to the client diversity distribution chart at clientdiversity.org to assess the distribution of different clients.
 
@@ -206,6 +206,101 @@ Execution command cheatsheet:
 Resetting the database should only be considered in specific scenarios such as recovering from a corrupted database due to power outages or hardware failures, reducing disk space usage by re-syncing, or upgrading to a new storage format. It's advisable to use this option as a last resort due to the significant time required for block synchronization. However, if any of the mentioned reasons apply to your situation, don't hesitate to proceed with the reset.
 
 When reviewing the logs at this stage, it's common to encounter errors because the consensus client may not be fully synchronized yet.
+
+## Step ?: Installing the validator
+
+```bash
+    # Create a service user.
+   sudo adduser --system --no-create-home --group validator
+   # Create data directory.
+   sudo mkdir -p /var/lib/lighthouse/validators
+```
+
+Import your validator keys using the keystore file. Make sure to enter the keystore password accurately. If you're setting up multiple validator nodes, avoid importing the validator keys into multiple clients simultaneously to prevent potential slashing. If you're transferring validators to a new setup or a different client, ensure the previous validator keys are deleted before proceeding.
+```bash
+   sudo lighthouse account validator import \
+     --network holesky \
+     --datadir /var/lib/lighthouse \
+     --directory=$HOME/staking-deposit-cli/validator_keys \
+     --reuse-password
+```
+
+If everything went good, your validator's public key will be shown. I encourage you to save it for future actions.
+```bash
+   sudo lighthouse account_manager validator list \
+     --network holesky \
+     --datadir /var/lib/lighthouse
+```
+
+Setup ownership permissions, including hardening the access to this directory.
+```bash
+   sudo chown -R validator:validator /var/lib/lighthouse/validators
+   sudo chmod 700 /var/lib/lighthouse/validators
+```
+
+
+Let's create another systemd file, this time for the consensus client.
+```bash
+   sudo nano /etc/systemd/system/validator.service
+```
+
+And paste the following:
+```bash
+   [Unit]
+   Description=Lighthouse Validator Client service for Holesky
+   Wants=network-online.target
+   After=network-online.target
+   Documentation=https://www.coincashew.com
+   
+   [Service]
+   Type=simple
+   User=validator
+   Group=validator
+   Restart=on-failure
+   RestartSec=3
+   KillSignal=SIGINT
+   TimeoutStopSec=900
+   ExecStart=/usr/local/bin/lighthouse vc \
+     --network holesky \
+     --beacon-nodes http://localhost:5052 \
+     --datadir /var/lib/lighthouse \
+     --graffiti="yourGraffityGoesHere!" \
+     --metrics \
+     --metrics-port 8009 \
+     --suggested-fee-recipient=<0x_CHANGE_THIS_TO_MY_ETH_FEE_RECIPIENT_ADDRESS>
+   
+   [Install]
+   WantedBy=multi-user.target
+```
+Replace <0x_CHANGE_THIS_TO_MY_ETH_FEE_RECIPIENT_ADDRESS> with your own Ethereum address. Tips are sent to this address and are immediately spendable. You should also change the graffiti, be careful to not send any information that may indentify you.
+
+Every time you change a systemd file, you have to run the next command:
+```bash
+   sudo systemctl daemon-reload
+```
+
+Enable auto-start at boot time, and start your client:
+```bash
+   sudo systemctl enable validator
+   sudo systemctl start validator
+```
+
+Consensus command cheatsheet:
+```bash
+   # View logs, my favourite one :)
+   sudo journalctl -fu validator | ccze
+   # Start
+   sudo systemctl start validator
+   # Stop
+   sudo systemctl stop validator
+   # Restart
+   sudo systemctl restart validator
+   # View status
+   sudo systemctl status validator
+```
+
+
+
 
 
 
