@@ -207,7 +207,135 @@ Resetting the database should only be considered in specific scenarios such as r
 
 When reviewing the logs at this stage, it's common to encounter errors because the consensus client may not be fully synchronized yet.
 
-## Step ?: Installing the validator
+
+## Step 4: Installing Lighthouse
+```bash
+   # Create a service user.
+   sudo adduser --system --no-create-home --group consensus
+   # Create data directory.
+   sudo mkdir -p /var/lib/lighthouse
+   # Assign ownership.
+   sudo chown -R consensus:consensus /var/lib/lighthouse
+   # Install dependencies.
+   sudo apt update
+   sudo apt install curl ccze jq -y
+```
+
+Download the binaries.
+```bash
+   RELEASE_URL="https://api.github.com/repos/sigp/lighthouse/releases/latest"
+   # Latest version
+   BINARIES_URL="$(curl -s $RELEASE_URL | jq -r ".assets[] | select(.name) | .browser_download_url" | grep x86_64-unknown-linux-gnu.tar.gz$)"
+   
+   echo Downloading URL: $BINARIES_URL
+   
+   cd $HOME
+   # Download
+   wget -O lighthouse.tar.gz $BINARIES_URL
+   # Untar
+   tar -xzvf lighthouse.tar.gz -C $HOME
+   # Cleanup
+   rm lighthouse.tar.gz
+
+   # Install the binaries
+   sudo mv $HOME/lighthouse /usr/local/bin/lighthouse
+```
+
+Create a systemd unit file for the consensus client.
+```bash
+   sudo nano /etc/systemd/system/consensus.service
+```
+
+And paste the following:
+```bash
+   [Unit]
+   Description=Lighthouse Consensus Layer Client service for Holesky
+   Wants=network-online.target
+   After=network-online.target
+   Documentation=https://www.coincashew.com
+   
+   [Service]
+   Type=simple
+   User=consensus
+   Group=consensus
+   Restart=on-failure
+   RestartSec=3
+   KillSignal=SIGINT
+   TimeoutStopSec=900
+   ExecStart=/usr/local/bin/lighthouse bn \
+     --datadir /var/lib/lighthouse \
+     --network holesky \
+     --staking \
+     --validator-monitor-auto \
+     --metrics \
+     --checkpoint-sync-url=https://holesky.beaconstate.ethstaker.cc \
+     --port 9000 \
+     --quic-port 9001 \
+     --http-port 5052 \
+     --target-peers 80 \
+     --metrics-port 8008 \
+     --execution-endpoint http://127.0.0.1:8551 \
+     --execution-jwt /secrets/jwtsecret
+   
+   [Install]
+   WantedBy=multi-user.target
+```
+
+Everytime you modify the systemd file, you should run the following command:
+```bash
+   sudo systemctl daemon-reload
+```
+Auto-start boot time, in case your consensus client stops.
+```bash
+   sudo systemctl enable consensus
+```
+
+Start your execution client.
+```bash
+   sudo systemctl start consensus
+```
+
+Consensus command cheatsheet:
+```bash
+   # View logs, my favourite one :)
+   sudo journalctl -fu consensus | ccze
+   # Start
+   sudo systemctl start consensus
+   # Stop
+   sudo systemctl stop consensus
+   # Restart
+   sudo systemctl restart consensus
+   # View status
+   sudo systemctl status consensus
+   # Reset Database
+   sudo systemctl stop consensus
+   sudo rm -rf /var/lib/lighthouse/beacon
+   sudo systemctl restart consensus
+```
+
+Okay, so when you're setting things up, give it a few minutes for the client and the consensus clients to sync properly. While you're watching the logs, don't be surprised if you spot a few errors or warnings popping up.
+1. If you see a SIGILL error, it's probably because your CPU isn't quite jiving with the latest Lighthouse version. No worries, just grab the Lighthouse portable build and install it.
+2. Now, if you notice you've got a low peer count while checking the consensus logs (less than 10 peers connected, it's time to troubleshoot:
+If you're running things on your own hardware, make sure your Wi-Fi provider's firewall isn't blocking with your ports. If everything looks clear there, move on to the next step.
+For VPS setups, double-check that the provider's firewall isn't blocking any ports. Even if it's not, there might still be some filtering going on. In that case, change the peer ports in both the execution client and the consensus client.
+
+To make those changes, do the following:
+```bash
+   # Open the execution file
+   sudo nano /etc/systemd/system/execution.service
+   # Change -Network.DiscoveryPort and --Network.P2PPort to another one, try adding the following port: 30305
+   # Execute the following command
+   sudo systemctl daemon-reload
+
+   # Open the consensus file
+   sudo nano /etc/systemd/system/consensus.service
+   # Change --port and --quic-port, try adding the following one: 9002 and 9003 respectivally.
+   # Execute the following command
+   sudo systemctl daemon-reload
+```
+Wait for a few minutes, and check again. Everyhting should be ok now :)
+
+## Step 5: Installing the validator
 
 ```bash
     # Create a service user.
@@ -237,7 +365,6 @@ Setup ownership permissions, including hardening the access to this directory.
    sudo chown -R validator:validator /var/lib/lighthouse/validators
    sudo chmod 700 /var/lib/lighthouse/validators
 ```
-
 
 Let's create another systemd file, this time for the consensus client.
 ```bash
@@ -298,8 +425,6 @@ Consensus command cheatsheet:
    # View status
    sudo systemctl status validator
 ```
-
-
 
 
 
