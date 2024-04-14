@@ -329,13 +329,115 @@ To make those changes, do the following:
 
    # Open the consensus file
    sudo nano /etc/systemd/system/consensus.service
-   # Change --port and --quic-port, try adding the following one: 9002 and 9003 respectivally.
+   # Change --port and --quic-port, try adding the following: 9002 and 9003 respectivally.
    # Execute the following command
    sudo systemctl daemon-reload
 ```
 Wait for a few minutes, and check again. Everyhting should be ok now :)
 
-## Step 5: Installing the validator
+## Step 5: Before installing the validator
+
+The first step is to acquire Holesky ethers. You'll need 32 ETH to create one validator. Simply put an address that YOU own into the following faucet:
+
+https://holesky-faucet.pk910.de
+
+After a few hours, you should have approximately 33 Holesky ethers in total (32 for the validator and the remainder for covering gas fees).
+
+For added security, consider using a hardware wallet address to store your withdrawal address, and a browser dApp wallet like Metamask to hold the 32 ETH for the validator. However, for testnet purposes, I'll be using Metamask for both functions. Remember, this approach is for testing only and should not be used on the mainnet.
+
+Now, let's proceed with creating your staking keys, which your validator will use to engage with the blockchain. I'll opt for the staking-deposit-cli method, as I believe it's the most reliable approach.
+
+```bash
+   # Download staking-deposit-cli
+   #Install dependencies
+   sudo apt install jq curl -y
+   
+   #Setup variables
+   RELEASE_URL="https://api.github.com/repos/ethereum/staking-deposit-cli/releases/latest"
+   BINARIES_URL="$(curl -s $RELEASE_URL | jq -r ".assets[] | select(.name) | .browser_download_url" | grep linux-amd64.tar.gz$)"
+   BINARY_FILE="staking-deposit-cli.tar.gz"
+   
+   echo "Downloading URL: $BINARIES_URL"
+   
+   cd $HOME
+   #Download binary
+   wget -O $BINARY_FILE $BINARIES_URL
+   #Extract archive
+   tar -xzvf $BINARY_FILE -C $HOME
+   #Rename
+   mv staking_deposit-cli*amd64 staking-deposit-cli
+   cd staking-deposit-cli
+```
+
+Make the mnemonic. Write this down on paper several times and keep it safe, without your mnemonic phrase, you won't be able to withdraw your ETH!:
+
+```bash
+   ./deposit new-mnemonic --chain holesky --execution_address <HARDWARE_WALLET_ADDRESS>
+   # Replace <HARDWARE_WALLET_ADDRESS> for your own withdrawal address.
+```
+A simple interface will pop up:
+1. Choose your language.
+2. Repeat your withdrawal address.
+3. Choose the language of the mnemonic word list (feel free to pick the one you're most comfortable with).
+4. Choose how many new validators you wish to run (1 in my case).
+5. Create a keystore password that secures your validator keystore files (rembember it).
+6. Repeat your keystore password for confirmation.
+7. Write down your 24 word mnemonic seed.
+8. Type your mnemonic.
+
+You should get:
+
+"Success!
+Your keys can be found at: /home/username/staking-deposit-cli/validator_keys"
+
+It is advisable to verify the mnmeonic seed, so let's proceed with that:
+
+```bash
+   #Make temp directory to verify seeds
+   mkdir -p ~/staking-deposit-cli/verify_seed
+   #Re-generate keys
+   ./deposit existing-mnemonic --chain holesky --folder verify_seed --execution_address <HARDWARE_WALLET_ADDRESS>
+```
+1. Choose your language.
+2. Repeat your withdrawal address.
+3. Type your mnemonic seed.
+4. Since this is the first time generating keys, enter the index number as 0.
+5. Repeat the index to confirm, 0.
+6. Enter how many validators you with to run (same as before).
+7. Enter any keystore password, since this is temporary and will be deleted.
+
+Compare the deposit_data files:
+
+```bash
+   diff -s validator_keys/deposit_data*.json verify_seed/validator_keys/deposit_data*.json
+```
+You should get the following:
+
+Files validator_keys/deposit_data-x.json and verify_seed/validator_keys/deposit_data-x.json are identical
+
+Clean up:
+```bash
+   rm -r verify_seed
+```
+
+The files we have generated are:
+1. **Keystore file:** Controls the validator's ability to sign transaction and can be recreated from your mnemonic recovery phrase. Keep this file secret.
+2. **Deposit contract**: Public information about your validator and can also be recreated from your mnemonic recovery phrase.
+
+After completing the previous steps, the next task is to deposit the 32 Holesky ETH in the launchpad (https://holesky.launchpad.ethereum.org/en/). However, before proceeding, we need to transfer our deposit_data-x.json file located in the validator_keys directory. Here are the options available:
+1. If you're using your own hardware, no additional action is required.
+2. If you're using a VPS:
+   2.1. Windows connecting to VPS: Use WinSCP, known for its secure and user-friendly interface. Avoid using Filezilla due to concerns about potential malware.
+   2.2. Linux connecting to VPS: Employ the SCP command for file transfer.
+
+After completing the previous steps, proceed to the launchpad and connect your Metamask wallet. Ensure that the deposit contract address is 0x4242424242424242424242424242424242424242. During the transaction to the deposit contract, there should be NO warnings or errors displayed.
+
+After completing the transaction, visit this page https://holesky.beaconcha.in and enter your public key to monitor the validator process. Please note that it may take approximately 10 days on the pending state for it to become active!
+
+![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/cf7db10c-8dc5-4c67-a4f6-7ae1f3040f18)
+
+
+## Step 6: Installing the validator
 
 ```bash
     # Create a service user.
@@ -391,7 +493,7 @@ And paste the following:
      --network holesky \
      --beacon-nodes http://localhost:5052 \
      --datadir /var/lib/lighthouse \
-     --graffiti="yourGraffityGoesHere!" \
+     --graffiti="<YOUR_GRAFFITI_GOES_HERE>" \
      --metrics \
      --metrics-port 8009 \
      --suggested-fee-recipient=<0x_CHANGE_THIS_TO_MY_ETH_FEE_RECIPIENT_ADDRESS>
@@ -425,6 +527,140 @@ Consensus command cheatsheet:
    # View status
    sudo systemctl status validator
 ```
+
+Wait for a few minutes and check the validator logs, if everything went ok you should get:
+
+INFO Connected to beacon node(s)  
+
+
+## Step 6: Installing Grafana and Prometheus
+Prometheus is a monitoring platform that collects metrics from monitored targets and Grafana is a dashboard used to visualize the collected data.
+
+Install Prometheus and Node Explorer:
+```bash
+   sudo apt-get install -y prometheus prometheus-node-exporter
+```
+
+Install Grafana:
+```bash
+   sudo apt-get install -y apt-transport-https
+   sudo apt-get install -y software-properties-common wget
+   sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+   echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+   sudo apt-get update && sudo apt-get install -y grafana
+```
+
+Enable services so they start automatically:
+```bash
+   sudo systemctl enable grafana-server prometheus prometheus-node-exporter
+```
+
+Create the prometheus.yml config file:
+```bash
+   # Remove the default prometheus.yml configuration file.
+   sudo rm /etc/prometheus/prometheus.yml
+   # Edit a new one
+   sudo nano /etc/prometheus/prometheus.yml
+```
+
+For a Nethermind + Lighthouse configuration, you have to paste the following:
+```bash
+   global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+    monitor: 'codelab-monitor'
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+   - job_name: 'node_exporter'
+     static_configs:
+       - targets: ['localhost:9100']
+   - job_name: 'lighthouse'
+     metrics_path: /metrics
+     static_configs:
+       - targets: ['localhost:8008']
+   - job_name: 'lighthouse_validator'
+     metrics_path: /metrics
+     static_configs:
+       - targets: ['localhost:8009']
+   - job_name: 'nethermind'
+     static_configs:
+       - targets: ['localhost:6060']
+```
+
+Follow the next steps:
+```bash
+   # Update file permissions
+   sudo chmod 644 /etc/prometheus/prometheus.yml
+
+   # Restart the services
+   sudo systemctl restart grafana-server prometheus prometheus-node-exporter
+
+   # Verify that the services are running
+   sudo systemctl status grafana-server prometheus prometheus-node-exporter
+```
+
+To access Grafana, you have to create a SSH Tunnel (only if you're using a VPS, if not just type localhost:3000 in yor browser).
+1. If you are using Linux or MacOS:
+```bash
+   ssh -N -v <user>@<staking.node.ip.address> -L 3000:localhost:3000
+
+   #Full Example
+   ssh -N -v ethereum@192.168.1.69 -L 3000:localhost:3000
+```
+2. If you're using Windows:
+
+   If you use Putty. Navigate to Connection > SSH > Tunnels > Enter Source Port 3000 > Enter Destination localhost:3000 > Click Add.
+
+   ![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/8d35afde-d6b8-40f2-a699-819f775b30e6)
+
+   Save the configuration. Navigate to Session > Enter a session name > Save. Then open the connection.
+
+   If you use Mobaxterm. Navigate to Tunneling > New SSH tunnel
+
+   ![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/33fb4117-225b-4985-955e-f00ab4cf2310)
+
+   Introduce your own VPS IP.
+   Save and start the tunnel.
+
+Now you can access Grafana on your local machine by pointing a web browser to http://localhost:3000
+
+Setup the Grafana Dashboards:
+1. Open http://localhost:3000
+2. Login with admin / admin
+3. Change password
+4. Click the configuration gear icon, then Add data Source
+5. Select Prometheus
+6. Set Name to "Prometheus"
+7. Set URL to http://localhost:9090
+8. Click Save & Test
+9. Download and save your Lighthouse configuration file: https://raw.githubusercontent.com/Yoldark34/lighthouse-staking-dashboard/main/Yoldark_ETH_staking_dashboard.json
+
+To download it windows, open PowerShell and do the following:
+```PowerShell
+   $url = "<lighhouse_config_file>"
+
+   $outputFile = "C:\downloads\myfile.txt" # For example
+
+   Invoke-WebRequest -Uri $url -OutFile $outputFile
+```
+10. Do the same with Nethermind: https://raw.githubusercontent.com/NethermindEth/metrics-infrastructure/master/grafana/provisioning/dashboards/nethermind.json
+11. Download the node exporter dashboard for general system monitoring: https://grafana.com/api/dashboards/11074/revisions/9/download
+12. Click Create + icon > Import
+13. Add the consensus client dashboard via Upload JSON file
+14. If needed, select Prometheus as Data Source.
+15. Click the Import button.
+16. Repeat steps 12-15 for the execution client dashboard.
+17. Repeat steps 12-15 for the node-exporter dashboard.
+
+These steps may slightly vary with new updates, please search for the latest Grafana configuration walkthroughs.
+
+
+
 
 
 
