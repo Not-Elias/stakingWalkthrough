@@ -333,6 +333,7 @@ To make those changes, do the following:
    # Execute the following command
    sudo systemctl daemon-reload
 ```
+While this solution addresses the issue, it doesn't use the full potential of the validator's capabilities. Nevertheless, it provides a workable alternative.
 Wait for a few minutes, and check again. Everyhting should be ok now :)
 
 ## Step 5: Before installing the validator
