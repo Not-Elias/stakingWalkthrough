@@ -662,7 +662,8 @@ These steps may slightly vary with new updates, please search for the latest Gra
 
 ## Step 8: Conclusions
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/c9ae8062-57ad-4c1b-941f-085741fc1fce/b5c523aa-6a71-4064-8cca-fc4057e6e1f2/Untitled.png)
+![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/a0dc155a-7d09-4450-b5b1-4fa0dd9c8e2d)
+
 
 
 
