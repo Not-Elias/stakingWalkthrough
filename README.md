@@ -534,7 +534,7 @@ Wait for a few minutes and check the validator logs, if everything went ok you s
 INFO Connected to beacon node(s)  
 
 
-## Step 6: Installing Grafana and Prometheus
+## Step 7: Installing Grafana and Prometheus
 Prometheus is a monitoring platform that collects metrics from monitored targets and Grafana is a dashboard used to visualize the collected data.
 
 Install Prometheus and Node Explorer:
@@ -659,6 +659,10 @@ To download it windows, open PowerShell and do the following:
 17. Repeat steps 12-15 for the node-exporter dashboard.
 
 These steps may slightly vary with new updates, please search for the latest Grafana configuration walkthroughs.
+
+## Step 8: Conclusions
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/c9ae8062-57ad-4c1b-941f-085741fc1fce/b5c523aa-6a71-4064-8cca-fc4057e6e1f2/Untitled.png)
 
 
 
