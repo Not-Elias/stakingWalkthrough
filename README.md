@@ -4,7 +4,7 @@ Find the process of setting up a validator node overwhelming? Don't worry, this 
 This walkthrough will guide you through the essential steps to set up a validator node on the Holesky testnet, considering that Goerli is deprecated. Additionally, it will address common errors that may occur during the process. While heavily influenced by https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator, this tutorial aims not to replace it but to share my personal experience, which may be beneficial for those with less expertise in this area. With that said, let's get started!
 
 ## Step 1: Hardware
-The primary limiting factor for staking on the testnet, apart from technical expertise, lies in hardware requirements. Not only it's needed a decent computer, but also a continuous internet and power connection. In terms of hardware specifications, you need the following:
+The primary limiting factor for staking on the testnet, apart from technical expertise, lies in hardware requirements. Not only it is needed a decent computer, but also a continuous internet and power connection. In terms of hardware specifications, you need the following:
 
 * 64-bit Linux (Ubuntu 22.04.1 is recommended).
 * Dual-core CPU, preferably Intel Core i5–760 or AMD FX-8100 or higher.
@@ -20,13 +20,13 @@ Given these considerations, you essentially have two options to consider:
 Personally, I opted for the latter as it tends to be more convenient. Specifically, I rented a VPS server from https://contabo.com/en/vps/, selecting a server with 12 vCPU cores, 48 GB RAM, 2 TB SSD, and 32 TB traffic. 
 
 ## Step 2: First steps
-If you're using a VPS from a Windows computer, utilize tools like Putty or Mobaxterm (the one I'll be using) to establish a connection to the node. On the other hand, if you're operating from a Linux computer, initiate an SSH connection via:
+If you are using a VPS from a Windows computer, use tools like Putty or Mobaxterm (the one I will be using) to establish a connection to the node. On the other hand, if you are operating from a Linux computer, initiate an SSH connection via:
 
 ```bash
    ssh username@vps_ip_address
 ```
 
-Simply log in if you're using a computer.
+Simply log in if you are using a computer.
 
 Once you are in, update and upgrade the node, and install all dependencies:
 
@@ -64,9 +64,9 @@ Log in as this new user (switch to this new user whenever you need to interact w
 su ethereum
 ```
 
-You can change your SSH configuration to automatically log in with this user by default. This way, you won't need to perform the previous step every time you log in. You should do the next steps in /home/ethereum directory.
+You can change your SSH configuration to automatically log in with this user by default. This way, you would not need to perform the previous step every time you log in. You should do the next steps in /home/ethereum directory.
 
-Now, let's proceed with the installation of Chrony. Chrony is an implementation of the Network Time Protocol (NTP) designed to synchronize your computer's time with NTP servers. Given that the consensus client relies on precise timing to execute attestations and generate blocks effectively, it's important that your node's time remains accurate.
+Now, let us proceed with the installation of Chrony. It is an implementation of the Network Time Protocol (NTP) designed to synchronize your computer's time with NTP servers. Given that the consensus client relies on precise timing to execute attestations and generate blocks effectively, it is important that your node's time remains accurate.
 ```bash
    # To install crhony
    sudo apt-get install chrony -y
@@ -81,7 +81,7 @@ Set your timezone.
 ```
 It will pop up a simple interface where u have to select where you live, if all has been done correctly, it should output your local time along with the universal time.
 
-Let's create a jwtsecret file, this file contains an hexadecimal string which ensures correct authenticated communications between both clients.
+Let us create a jwtsecret file, this file contains an hexadecimal string which ensures correct authenticated communications between both clients.
 ```bash
    # Store the jwtsecret file at /secrets
    sudo mkdir -p /secrets
@@ -92,11 +92,11 @@ Let's create a jwtsecret file, this file contains an hexadecimal string which en
    # Enable read access
    sudo chmod 644 /secrets/jwtsecret
 ```
-Enabling a firewall is not mandatory, but it's highly recommended for enhancing security. Similarly, installing fail2ban is an important step, as it automatically blocks IP addresses after a certain number of failed login attempts. If u want to proceed with this, refer to https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator/step-2-configuring-node.
+Enabling a firewall is not mandatory, but it is highly recommended for enhancing security. Similarly, installing fail2ban is an important step, as it automatically blocks IP addresses after a certain number of failed login attempts. If you want to proceed with this, refer to https://www.coincashew.com/coins/overview-eth/testnet-holesky-validator/step-2-configuring-node.
 
 
 ## Step 3: Installing Nethermind
-After installing any client, I encourage you to do your own research. It's always a good practise to use minority client to avoid no-finality risks, in my case, I will use a Nethermind + Lighthosue combination.
+After installing any client, I encourage you to do your own research. It is always a good practise to use minority client to avoid no-finality risks, in my case, I will use a Nethermind + Lighthosue combination.
 ![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/7cd31dfe-4420-4337-a296-3528671337f4)
 You can refer to the client diversity distribution chart at clientdiversity.org to assess the distribution of different clients.
 
@@ -203,9 +203,9 @@ Execution command cheatsheet:
    sudo rm -rf /var/lib/nethermind/*
    sudo systemctl restart execution
 ```
-Resetting the database should only be considered in specific scenarios such as recovering from a corrupted database due to power outages or hardware failures, reducing disk space usage by re-syncing, or upgrading to a new storage format. It's advisable to use this option as a last resort due to the significant time required for block synchronization. However, if any of the mentioned reasons apply to your situation, don't hesitate to proceed with the reset.
+Resetting the database should only be considered in specific scenarios such as recovering from a corrupted database due to power outages or hardware failures, reducing disk space usage by re-syncing, or upgrading to a new storage format. It is advisable to use this option as a last resort due to the significant time required for block synchronization. However, if any of the mentioned reasons apply to your situation, do not hesitate to proceed with the reset.
 
-When reviewing the logs at this stage, it's common to encounter errors because the consensus client may not be fully synchronized yet.
+When reviewing the logs at this stage, it is common to encounter errors because the consensus client may not be fully synchronized yet.
 
 
 ## Step 4: Installing Lighthouse
@@ -313,11 +313,11 @@ Consensus command cheatsheet:
    sudo systemctl restart consensus
 ```
 
-Okay, so when you're setting things up, give it a few minutes for the client and the consensus clients to sync properly. While you're watching the logs, don't be surprised if you spot a few errors or warnings popping up.
-1. If you see a SIGILL error, it's probably because your CPU isn't quite jiving with the latest Lighthouse version. No worries, just grab the Lighthouse portable build and install it.
-2. Now, if you notice you've got a low peer count while checking the consensus logs (less than 10 peers connected, it's time to troubleshoot:
-If you're running things on your own hardware, make sure your Wi-Fi provider's firewall isn't blocking with your ports. If everything looks clear there, move on to the next step.
-For VPS setups, double-check that the provider's firewall isn't blocking any ports. Even if it's not, there might still be some filtering going on. In that case, change the peer ports in both the execution client and the consensus client.
+Okay, so when you are setting things up, give it a few minutes for the client and the consensus clients to sync properly. While you are watching the logs, don not be surprised if you spot a few errors or warnings popping up.
+1. If you see a SIGILL error, it is probably because your CPU is not quite jiving with the latest Lighthouse version. No worries, just grab the Lighthouse portable build and install it.
+2. Now, if you notice you have got a low peer count while checking the consensus logs (less than 10 peers connected, it is time to troubleshoot:
+If you are running things on your own hardware, make sure your Wi-Fi provider's firewall is not blocking with your ports. If everything looks clear there, move on to the next step.
+For VPS setups, double-check that the provider's firewall is not blocking any ports. Even if it is not, there might still be some filtering going on. In that case, change the peer ports in both the execution client and the consensus client.
 
 To make those changes, do the following:
 ```bash
@@ -333,20 +333,20 @@ To make those changes, do the following:
    # Execute the following command
    sudo systemctl daemon-reload
 ```
-While this solution addresses the issue, it doesn't use the full potential of the validator's capabilities. Nevertheless, it provides a workable alternative.
+While this solution addresses the issue, it does not use the full potential of the validator's capabilities. Nevertheless, it provides a workable alternative.
 Wait for a few minutes, and check again. Everyhting should be ok now :)
 
 ## Step 5: Before installing the validator
 
-The first step is to acquire Holesky ethers. You'll need 32 ETH to create one validator. Simply put an address that YOU own into the following faucet:
+The first step is to acquire Holesky ethers. You will need 32 ETH to create one validator. Simply put an address that YOU own into the following faucet:
 
 https://holesky-faucet.pk910.de
 
 After a few hours, you should have approximately 33 Holesky ethers in total (32 for the validator and the remainder for covering gas fees).
 
-For added security, consider using a hardware wallet address to store your withdrawal address, and a browser dApp wallet like Metamask to hold the 32 ETH for the validator. However, for testnet purposes, I'll be using Metamask for both functions. Remember, this approach is for testing only and should not be used on the mainnet.
+For added security, consider using a hardware wallet address to store your withdrawal address, and a browser dApp wallet like Metamask to hold the 32 ETH for the validator. However, for testnet purposes, I will be using Metamask for both functions. Remember, this approach is for testing only and should not be used on the mainnet.
 
-Now, let's proceed with creating your staking keys, which your validator will use to engage with the blockchain. I'll opt for the staking-deposit-cli method, as I believe it's the most reliable approach.
+Now, let us proceed with creating your staking keys, which your validator will use to engage with the blockchain. I will opt for the staking-deposit-cli method, as I believe it is the most reliable approach.
 
 ```bash
    # Download staking-deposit-cli
@@ -370,7 +370,7 @@ Now, let's proceed with creating your staking keys, which your validator will us
    cd staking-deposit-cli
 ```
 
-Make the mnemonic. Write this down on paper several times and keep it safe, without your mnemonic phrase, you won't be able to withdraw your ETH!:
+Make the mnemonic. Write this down on paper several times and keep it safe, without your mnemonic phrase, you will not be able to withdraw your ETH!:
 
 ```bash
    ./deposit new-mnemonic --chain holesky --execution_address <HARDWARE_WALLET_ADDRESS>
@@ -379,7 +379,7 @@ Make the mnemonic. Write this down on paper several times and keep it safe, with
 A simple interface will pop up:
 1. Choose your language.
 2. Repeat your withdrawal address.
-3. Choose the language of the mnemonic word list (feel free to pick the one you're most comfortable with).
+3. Choose the language of the mnemonic word list (feel free to pick the one you are most comfortable with).
 4. Choose how many new validators you wish to run (1 in my case).
 5. Create a keystore password that secures your validator keystore files (rembember it).
 6. Repeat your keystore password for confirmation.
@@ -391,7 +391,7 @@ You should get:
 "Success!
 Your keys can be found at: /home/username/staking-deposit-cli/validator_keys"
 
-It is advisable to verify the mnmeonic seed, so let's proceed with that:
+It is advisable to verify the mnmeonic seed, so let us proceed with that:
 
 ```bash
    #Make temp directory to verify seeds
@@ -426,8 +426,8 @@ The files we have generated are:
 2. **Deposit contract**: Public information about your validator and can also be recreated from your mnemonic recovery phrase.
 
 After completing the previous steps, the next task is to deposit the 32 Holesky ETH in the launchpad (https://holesky.launchpad.ethereum.org/en/). However, before proceeding, we need to transfer our deposit_data-x.json file located in the validator_keys directory. Here are the options available:
-1. If you're using your own hardware, no additional action is required.
-2. If you're using a VPS:
+1. If you are using your own hardware, no additional action is required.
+2. If you are using a VPS:
    
    2.1. Windows connecting to VPS: Use WinSCP, known for its secure and user-friendly interface. Avoid using Filezilla due to concerns about potential malware.
    
@@ -449,7 +449,7 @@ After completing the transaction, visit this page https://holesky.beaconcha.in a
    sudo mkdir -p /var/lib/lighthouse/validators
 ```
 
-Import your validator keys using the keystore file. Make sure to enter the keystore password accurately. If you're setting up multiple validator nodes, avoid importing the validator keys into multiple clients simultaneously to prevent potential slashing. If you're transferring validators to a new setup or a different client, ensure the previous validator keys are deleted before proceeding.
+Import your validator keys using the keystore file. Make sure to enter the keystore password accurately. If you are setting up multiple validator nodes, avoid importing the validator keys into multiple clients simultaneously to prevent potential slashing. If you are transferring validators to a new setup or a different client, ensure the previous validator keys are deleted before proceeding.
 ```bash
    sudo lighthouse account validator import \
      --network holesky \
@@ -471,7 +471,7 @@ Setup ownership permissions, including hardening the access to this directory.
    sudo chmod 700 /var/lib/lighthouse/validators
 ```
 
-Let's create another systemd file, this time for the consensus client.
+Let us create another systemd file, this time for the consensus client.
 ```bash
    sudo nano /etc/systemd/system/validator.service
 ```
@@ -607,7 +607,7 @@ Follow the next steps:
    sudo systemctl status grafana-server prometheus prometheus-node-exporter
 ```
 
-To access Grafana, you have to create a SSH Tunnel (only if you're using a VPS, if not just type localhost:3000 in yor browser).
+To access Grafana, you have to create a SSH Tunnel (only if you are using a VPS, if not just type localhost:3000 in yor browser).
 1. If you are using Linux or MacOS:
 ```bash
    ssh -N -v <user>@<staking.node.ip.address> -L 3000:localhost:3000
@@ -615,7 +615,7 @@ To access Grafana, you have to create a SSH Tunnel (only if you're using a VPS, 
    #Full Example
    ssh -N -v ethereum@192.168.1.69 -L 3000:localhost:3000
 ```
-2. If you're using Windows:
+2. If you are using Windows:
 
    If you use Putty. Navigate to Connection > SSH > Tunnels > Enter Source Port 3000 > Enter Destination localhost:3000 > Click Add.
 
