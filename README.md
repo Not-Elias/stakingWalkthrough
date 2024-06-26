@@ -428,7 +428,9 @@ The files we have generated are:
 After completing the previous steps, the next task is to deposit the 32 Holesky ETH in the launchpad (https://holesky.launchpad.ethereum.org/en/). However, before proceeding, we need to transfer our deposit_data-x.json file located in the validator_keys directory. Here are the options available:
 1. If you're using your own hardware, no additional action is required.
 2. If you're using a VPS:
+   
    2.1. Windows connecting to VPS: Use WinSCP, known for its secure and user-friendly interface. Avoid using Filezilla due to concerns about potential malware.
+   
    2.2. Linux connecting to VPS: Employ the SCP command for file transfer.
 
 After completing the previous steps, proceed to the launchpad and connect your Metamask wallet. Ensure that the deposit contract address is 0x4242424242424242424242424242424242424242. During the transaction to the deposit contract, there should be NO warnings or errors displayed.
