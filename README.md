@@ -664,11 +664,7 @@ These steps may slightly vary with new updates, please search for the latest Gra
 
 ## Step 8: Conclusions
 
-After all of these steps, you will have a validator running on Holesky, which is a crucial step for staking in the mainet.
-![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/a0dc155a-7d09-4450-b5b1-4fa0dd9c8e2d)
-
-
-
+After completing these steps, you will have a validator running on Holesky, which is a recommended step before staking on the mainnet.
 
 ![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/3192a9d9-844b-460f-9f56-e5e6536ceeff)
 
