@@ -50,8 +50,9 @@ If all the steps mentioned above were followed correctly, you should now have bo
 * For holesky testnet: https://holesky.beaconcha.in/tools/broadcast
 * For the mainnet: https://beaconcha.in/tools/broadcast
 
+You should see the following:
 
-
+![image](https://github.com/Not-Elias/staking_walkthrough/assets/58786035/91f802d0-dd07-4dca-ac1a-2bc69f14a3fc)
 
 
 
